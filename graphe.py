@@ -48,10 +48,62 @@ class Graphe:
                         self.nodeList[j].inFlow.append(Flow(self.get_node(i), int(lines[i][j])))
 
     def display_capacity(self):
-        for i in range(len(self.nodeList)):
-            for j in range(len(self.nodeList)):
-                if self.nodeList[i].get_out_node(j) is not None:
-                    print(str(self.nodeList[i].get_out_node(j).capacity), end=" ")
-                else:
-                    print("0", end=" ")
-            print()
+        # Caractères box ASCII
+        horizontal = "─"
+        vertical = "│"
+        corner_tl = "┌"
+        corner_tr = "┐"
+        corner_bl = "└"
+        corner_br = "┘"
+        t_down = "┬"
+        t_up = "┴"
+        t_right = "├"
+        t_left = "┤"
+        cross = "┼"
+
+        n = len(self.nodeList)
+        cell_width = 8
+
+        # En-tête avec la première ligne
+        header = f"{corner_tl}{horizontal * cell_width}{t_down}" + f"{horizontal * cell_width}{t_down}" * (
+                    n - 1) + f"{horizontal * cell_width}{corner_tr}"
+        print(header)
+
+        # Ligne avec les numéros de colonnes
+        header = f"{vertical}{'':^{cell_width}}{vertical}"
+        for j in range(n):
+            if j == 0:
+                label = "S"
+            elif j == n - 1:
+                label = "T"
+            else:
+                label = chr(96 + j)  # 97 est le code ASCII pour 'a'
+            header += f"{label:^{cell_width}}{vertical}"
+        print(header)
+
+        # Séparateur
+        separator = f"{t_right}{horizontal * cell_width}{cross}" + f"{horizontal * cell_width}{cross}" * (
+                    n - 1) + f"{horizontal * cell_width}{t_left}"
+        print(separator)
+
+        # Contenu du tableau
+        for i in range(n):
+            if i == 0:
+                label = "S"
+            elif i == n - 1:
+                label = "T"
+            else:
+                label = chr(96 + i)  # 97 est le code ASCII pour 'a'
+            row = f"{vertical}{label:^{cell_width}}{vertical}"
+            for j in range(n):
+                capacity = self.nodeList[i].get_out_node(j).capacity if self.nodeList[i].get_out_node(
+                    j) is not None else 0
+                row += f"{capacity if capacity != 0 else ' ':^{cell_width}}{vertical}"
+            print(row)
+            if i < n - 1:
+                print(separator)
+            else:
+                # Bas du tableau
+                footer = f"{corner_bl}{horizontal * cell_width}{t_up}" + f"{horizontal * cell_width}{t_up}" * (
+                            n - 1) + f"{horizontal * cell_width}{corner_br}"
+                print(footer)
