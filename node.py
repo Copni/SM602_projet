@@ -15,9 +15,9 @@ class Node:
     def display(self):
         print(f"Noeud : {self.id:<10}")
         for i in self.inFlow:
-            i.display("in")
+            i.display_data("in")
         for i in self.outFlow:
-            i.display()
+            i.display_data()
         print()
 
     def get_out_node(self, id):
@@ -33,9 +33,10 @@ class Node:
         return None
 
 class Flow:
-    def __init__(self, node, capacity, cost=None):
+    def __init__(self, node, capacity, quantity=0, cost=None):
         self.node =  node
         self.capacity = capacity if capacity is not None else 0
+        self.quantity = quantity
         self.cost = cost if cost is not None else 0
 
     def duplicate(self, name=None):
