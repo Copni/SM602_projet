@@ -1,5 +1,3 @@
-from node import Node
-
 from graph import Graph
 
 def main():
@@ -9,12 +7,16 @@ def main():
     # Display the graph
     graph.display_data()
 
-    graph.display_capacity()
-    graph.display_cost()
-    graph.display_residual()
     print()
     graph.width_route(display=True)
+    graph.maximize_flow(display=True)
+    graph.width_route(display=True)
+    graph.maximize_flow(display=True)
+    graph.width_route(display=True)
+    graph.maximize_flow(display=True)
+
 
 
 if __name__ == "__main__":
     main()
+

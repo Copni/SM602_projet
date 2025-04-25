@@ -9,11 +9,6 @@ class Graph:
         return None
 
 
-    def display_data(self):
-        for i in self.nodeList:
-            i.display()
-
-
     def __init__(self, name, file=None):
         self.name = str(name)
         self.nodeList = []  # Liste des nœuds
@@ -66,7 +61,7 @@ class Graph:
         n = len(self.nodeList)
         matrix = [[0 for _ in range(n)] for _ in range(n)]
         for i in range(n):
-            for j in range(len(n)):
+            for j in range(n):
                 out_node = self.nodeList[i].get_out_node(j)
                 if out_node is not None:
                     matrix[i][j] = out_node.capacity - out_node.quantity
@@ -90,10 +85,15 @@ class Graph:
                     residual_graph.nodeList[i].outFlow.append(Flow(residual_graph.get_node(j), quantity=(residual_matrix[i][j])))
                     residual_graph.nodeList[j].inFlow.append(Flow(residual_graph.get_node(i), quantity=(residual_matrix[i][j])))
 
+        return residual_graph
 
     def width_route(self, display=False):
-        queue = [self.get_node(0)]
+        start_node = self.get_node(0)
+        final_node_id = len(self.nodeList) - 1
+        queue = [start_node]
         visited = []
+        # Dictionnaire pour stocker le parent de chaque nœud
+        parent = {start_node: None}
 
         while queue:
             node = queue.pop(0)
@@ -103,19 +103,82 @@ class Graph:
                 print(f"\nTête de file : {node.id}")
                 print("Noeud en attente: ", ", ".join(str(n.id) for n in queue))
 
-            for flow in node.outFlow:
+            if node.id == final_node_id:
+                # Reconstruction du chemin
+                path = []
+                current = node
+                while current is not None:
+                    path.append(current)
+                    current = parent[current]
+                path.reverse()
+
+                if display:
+                    print("\nChemin trouvé: ", " -> ".join(str(n.id) for n in path))
+                return path
+
+            # Trier les flux sortants par id de nœud croissant
+            sorted_flows = sorted(node.outFlow, key=lambda x: x.node.id)
+            for flow in sorted_flows:
                 if flow.node not in visited and flow.node not in queue:
                     queue.append(flow.node)
+                    parent[flow.node] = node
 
-        if display:
-            print("\nChemin parcouru: ", " -> ".join(str(n.id) for n in visited))
-
-        return visited
+        return None  # Si aucun chemin n'est trouvé
 
 
-    def max_flow(self, display=False):
+    def maximize_flow(self, display=False):
         # Implémentation de l'algorithme de Ford-Fulkerson
-        pass
+
+        # On crée le graphe résiduel
+        residual_graph = self.get_residual_graph()
+
+        # On parcourt le graphe résiduel en largeur et on récupère le chemin
+        path = residual_graph.width_route()
+
+        # On vérifit que le chemin conduit bien au noeud terminal
+        if path[-1].id != len(residual_graph.nodeList) - 1:
+            print("On ne peut pas maximiser plus le flot")
+            return False
+        else: # On maximise le flot de path
+            # On cherche le débit optimisable
+            print("hello")
+            print(path[0].get_out_flow(path[1]).quantity)
+            min_quantity = path[0].get_out_flow(path[1]).quantity
+            for i in range(len(path) - 1):
+                flow = path[i].get_out_flow(path[i + 1])
+                if flow and flow.quantity < min_quantity:
+                    min_quantity = flow.quantity
+
+                    # On met à jour les capacités du graphe
+                    for i in range(len(path) - 1):
+                        # Mise à jour du flot direct
+                        out_flow = self.nodeList[path[i].id].get_out_flow(self.nodeList[path[i + 1].id])
+                        if out_flow:
+                            out_flow.quantity += min_quantity
+
+                        # Mise à jour du flot inverse
+                        in_flow = self.nodeList[path[i + 1].id].get_in_flow(self.nodeList[path[i].id])
+                        if in_flow:
+                            in_flow.quantity += min_quantity
+            if display:
+                print(f"\nFlot maximisé de {min_quantity} entre le noeud {path[0].id} et le noeud {path[-1].id}")
+                print("Flot mis à jour: ")
+                self.display_residual()
+                self.display_quantity()
+
+            return True
+
+    def maximize_graph(self, display=False):
+        # On maximise le flot tant qu'il y a un chemin entre S et T
+        max = True
+        while max != False:
+            max = self.maximize_flow(display)
+
+
+
+
+
+
 
     def bellman_ford(self, start_node):
         pass
@@ -129,7 +192,13 @@ class Graph:
 
     ### Fonctions d'affichage
 
+    def display_data(self):
+        for i in self.nodeList:
+            i.display()
+
+
     def display_residual(self):
+        print("Matrice d'adjacence du graphe résiduel :")
         # Caractères box ASCII
         horizontal = "─"
         vertical = "│"
@@ -197,7 +266,9 @@ class Graph:
                             n - 1) + f"{horizontal * cell_width}{corner_br}"
                 print(footer)
 
+
     def display_capacity(self):
+        print("Matrice de capacités du graphes")
         # Caractères box ASCII
         horizontal = "─"
         vertical = "│"
@@ -258,7 +329,9 @@ class Graph:
                             n - 1) + f"{horizontal * cell_width}{corner_br}"
                 print(footer)
 
+
     def display_cost(self):
+        print("Matrice de coût du graphe :")
         # Caractères box ASCII
         horizontal = "─"
         vertical = "│"
@@ -319,4 +392,59 @@ class Graph:
                         n - 1) + f"{horizontal * cell_width}{corner_br}"
                 print(footer)
 
+    def display_quantity(self):
+        print("Matrice des quantités du graphe :")
+        horizontal = "─"
+        vertical = "│"
+        corner_tl = "┌"
+        corner_tr = "┐"
+        corner_bl = "└"
+        corner_br = "┘"
+        t_down = "┬"
+        t_up = "┴"
+        t_right = "├"
+        t_left = "┤"
+        cross = "┼"
+
+        n = len(self.nodeList)
+        cell_width = 8
+
+        # En-tête
+        header = f"{corner_tl}{horizontal * cell_width}{t_down}" + f"{horizontal * cell_width}{t_down}" * (
+                    n - 1) + f"{horizontal * cell_width}{corner_tr}"
+        print(header)
+
+        # Ligne avec les labels de colonnes
+        header = f"{vertical}{'':^{cell_width}}{vertical}"
+        for j in range(n):
+            label = "S" if j == 0 else "T" if j == n - 1 else chr(96 + j)
+            header += f"{label:^{cell_width}}{vertical}"
+        print(header)
+
+        # Séparateur
+        separator = f"{t_right}{horizontal * cell_width}{cross}" + f"{horizontal * cell_width}{cross}" * (
+                    n - 1) + f"{horizontal * cell_width}{t_left}"
+        print(separator)
+
+        # Contenu du tableau
+        for i in range(n):
+            label = "S" if i == 0 else "T" if i == n - 1 else chr(96 + i)
+            row = f"{vertical}{label:^{cell_width}}{vertical}"
+            for j in range(n):
+                out_flow = self.nodeList[i].get_out_node(j)
+                if out_flow is not None:
+                    quantity = out_flow.quantity
+                    capacity = out_flow.capacity
+                    cell_content = f"{quantity}/{capacity}"
+                    row += f"{cell_content:^{cell_width}}{vertical}"
+                else:
+                    row += f"{' ':^{cell_width}}{vertical}"
+            print(row)
+            if i < n - 1:
+                print(separator)
+            else:
+                # Bas du tableau
+                footer = f"{corner_bl}{horizontal * cell_width}{t_up}" + f"{horizontal * cell_width}{t_up}" * (
+                            n - 1) + f"{horizontal * cell_width}{corner_br}"
+                print(footer)
 

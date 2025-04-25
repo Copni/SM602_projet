@@ -32,23 +32,38 @@ class Node:
                 return i
         return None
 
+    def get_out_flow(self, node):
+        for i in self.outFlow:
+            if i.node == node:
+                return i
+        return None
+
+    def get_in_flow(self, node):
+        for i in self.inFlow:
+            if i.node == node:
+                return i
+        return None
+    
+
 class Flow:
-    def __init__(self, node, capacity, quantity=0, cost=None):
+    def __init__(self, node, capacity=None, quantity=0, cost=None):
         self.node =  node
         self.capacity = capacity if capacity is not None else 0
         self.quantity = quantity
         self.cost = cost if cost is not None else 0
 
+
     def duplicate(self, name=None):
         d = deepcopy(self)
         return d
 
-    def display(self, direction=None):
+    def display_data(self, direction=None):
         if direction is None or direction == "out":
-            print(f"    Destination : {self.node.id:<10} Coût : {self.cost:<10} Capacité : {self.capacity:<10}")
-        else :
-            if direction == "in":
-                print(f"    Source      : {self.node.id:<10} Coût : {self.cost:<10} Capacité : {self.capacity:<10}")
-            else:
-                print("Erreur d'affichage")
-                return None
+            print(
+                f"    Destination : {self.node.id:<10} Capacité : {self.capacity:<10} Quantité : {self.quantity:<10} Coût : {self.cost:<10}")
+        elif direction == "in":
+            print(
+                f"    Source      : {self.node.id:<10} Capacité : {self.capacity:<10} Quantité : {self.quantity:<10} Coût : {self.cost:<10}")
+        else:
+            print("Erreur d'affichage")
+            return None
