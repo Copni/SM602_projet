@@ -1,22 +1,18 @@
-from graph import Graph
+from graph import *
+from maxFF import *
+from maxPR import *
+from minC import minimizeC
 
-def main():
-    # Create a graph
-    graph = Graph("TestGraph", "proposition1.txt")
+'''
+graph = read_graph("proposition1.txt")
+print_graph(graph)
 
-    # Display the graph
-    graph.display_data()
+maximizePR(graph, True)
+print_graph(graph)
 
-    print()
-    graph.width_route(display=True)
-    graph.maximize_flow(display=True)
-    graph.width_route(display=True)
-    graph.maximize_flow(display=True)
-    graph.width_route(display=True)
-    graph.maximize_flow(display=True)
-
-
-
-if __name__ == "__main__":
-    main()
-
+graph = read_graph("proposition1.txt")
+maximizePR(graph, True)
+print_graph(graph)
+'''
+graph = read_graph("P6-flotmin.txt")
+minimizeC(graph, True)
