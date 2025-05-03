@@ -1,104 +1,146 @@
 from graph import *
+from display import *
+from maxEK import get_residual_EK
 
-def init_label(graph):
-    C = graph[0]
-    label = {}
-    n = len(C)
-    for i in range(n):
-        label[i] = 0
-    label[0] = n  # Source a hauteur n
-    return label
+def init_PR(graph, display=False):
+    capacity = graph[0]
+    flow = graph[1]
+    n = len(capacity)
+    s = 0
+    t = n - 1
 
+    h = [0] * n # Initialisation des hauteurs
+    e = [0] * n # Initialisation des excédents
 
-def push(graph, label):
-    C = graph[0]
-    F = graph[1]
-    n = len(C)
+    h[s] = n
 
-    active_nodes = []
-    for u in range(1, n-1):  # Ignore source (0) et puits (n-1)
-        excess = sum(F[i][u] for i in range(n)) - sum(F[u][j] for j in range(n)) # On calcule l'excès de flot
-        if excess > 0:
-            active_nodes.append(u) # On ajoute le noeud actif à la liste si il a un excès de flot
-
-    active_nodes.sort()
-
-    for u in active_nodes:
-        excess = sum(F[i][u] for i in range(n)) - sum(F[u][j] for j in range(n))
-        for v in range(n):
-            # Vérifie si une poussée est possible : il doit y avoir de la capacité résiduelle
-            # et la hauteur du noeud courant doit être égale à celle du noeud voisin + 1
-            if C[u][v] - F[u][v] > 0 and label[u] == label[v] + 1:
-                # Calcule le flot maximum pouvant être poussé
-                delta = min(excess, C[u][v] - F[u][v])
-                # Met à jour le flot dans la direction u -> v
-                F[u][v] += delta
-                # Met à jour le flot dans la direction inverse v -> u
-                F[v][u] -= delta
-                return True  # Poussée effectuée
-    return False  # Aucune poussée possible
-
-
-def adjust_label(graph, label):
-    C = graph[0]
-    F = graph[1]
-    n = len(C)
-
-    active_nodes = []
-    for u in range(1, n-1):  # Ignore source (0) et puits (n-1)
-        excess = sum(F[i][u] for i in range(n)) - sum(F[u][j] for j in range(n))
-        if excess > 0:
-            active_nodes.append(u)
-
-    active_nodes.sort()
-
-    for u in active_nodes:
-        min_height = float('inf')
-        for v in range(n):
-            if C[u][v] - F[u][v] > 0:
-                if label[v] < min_height:
-                    min_height = label[v]
-        if min_height < float('inf'):
-            label[u] = min_height + 1
-            break  # Réétiqueter un seul noeud actif
-    return label
-
-
-def maximizePR(graph, display=False):
-    label = init_label(graph)
-    C = graph[0]
-    F = graph[1]
-    n = len(C)
-
-    # Pré-flot initial : pousser au maximum depuis la source
-    for v in range(1, n):
-        if C[0][v] > 0:
-            F[0][v] = C[0][v]
-            F[v][0] = -C[0][v]
-
-    while True:
-        pushed = push(graph, label)
-        if not pushed:
-            old_label = label.copy()
-            label = adjust_label(graph, label)
-            if label == old_label:
-                break
-
-    graph[1] = convert_flow(F)  # Convertir le flot pour l'affichage
+    # Initialisation de le fluc et l'éxédent initial depuis la source
+    for v in range(n):
+        if capacity[s][v] > 0:
+            flow[s][v] = capacity[s][v]
+            flow[v][s] = -capacity[s][v] # flot inverse dans le graphe de flot
+            e[v] = capacity[s][v]
+            e[s] -= capacity[s][v] # exédent retiré de la source
     if display:
-        print("Flot maximal :", sum(F[0][j] for j in range(n)))
+        print("Initialisation du flot et de l'exédent :")
+        print_heights_and_excess(h, e)
+    return h, e
 
 
+def push_PR(u, v, graph, h, e, display=False):
+    capacity = graph[0]
+    flow = graph[1]
 
-def convert_flow(F):
-    n = len(F)
+    residual = capacity[u][v] - flow[u][v] # capacité résiduelle (ce qui peut encore être envoyé)
+    if e[u] > 0 and residual > 0 and h[u] == h[v] + 1: # Si exédent et capacité résiduelle, et si la hauteur est valide
+        # Mise à jour des flots
+        delta = min(e[u], residual)
+        flow[u][v] += delta
+        flow[v][u] -= delta  # flot inverse dans le graphe de flot
+        e[u] -= delta
+        e[v] += delta
 
-    final_flow = []
-    for i in range(n):
-        row = []
-        for j in range(n):
-            # Si le flot est positif de i vers j, on le garde, sinon 0
-            row.append(max(F[i][j], 0))
-        final_flow.append(row)
+        if display:
+            label_u = "S" if u == 0 else "T" if u == len(h) - 1 else chr(ord('a') + u - 1)
+            label_v = "S" if v == 0 else "T" if v == len(h) - 1 else chr(ord('a') + v - 1)
+            print(f"Flot poussé de {label_u} vers {label_v} : {delta}")
 
-    return final_flow
+def relabel_PR(u, graph, h, e, display=False):
+    # On réétiquette le noeud u
+    capacity = graph[0]
+    flow = graph[1]
+    n = len(capacity)
+
+    if e[u] <= 0:
+        return
+
+    min_height = float('inf')
+    for v in range(n):
+        if capacity[u][v] - flow[u][v] > 0:
+            min_height = min(min_height, h[v])
+
+    if min_height < float('inf'):
+        h[u] = min_height + 1
+
+    if display:
+        label = "S" if u == 0 else "T" if u == len(h) - 1 else chr(ord('a') + u - 1)
+        print(f"Réétiquetage du noeud {label} : nouvelle hauteur {h[u]}")
+
+def maximize_PR(graph, display=False):
+    n = len(graph[0])
+    s = 0
+    t = n - 1
+
+    h, e = init_PR(graph, display)
+
+    # Unitialisation des noeuds actifs
+    active = [u for u in range(n) if u != s and u != t and e[u] > 0]
+    i = 0
+    while active:
+        if display:
+            active_labels = ["S" if u == 0 else "T" if u == len(h) - 1 else chr(ord('a') + u - 1) for u in active]
+            print(f"--- Iteration {i} ---:")
+            print(f"Noeuds actifs : {active_labels}")
+        u = active.pop(0)
+        pushed = False
+        # On essaie de pousser le flot vers les voisins
+        for v in range(n):
+            old_e_v = e[v]
+            push_PR(u, v, graph, h, e, display)
+            if e[v] > old_e_v and v != s and v != t and v not in active: # Si le flot a été poussé et que v n'est pas la source ou le puits
+                active.append(v) # On ajoute v à la liste des noeuds actifs
+            if e[u] == 0: # Si l'exédent de u est nul, on ne peut plus pousser de flot
+                pushed = True
+                break
+        if not pushed: # Si on n'a pas pu pousser de flot, on relabel
+            relabel_PR(u, graph, h, e, display)
+            active.append(u)
+        i += 1
+        # On affiche les hauteurs et les exédents
+        if display:
+            label = "S" if u == 0 else "T" if u == len(h) - 1 else chr(ord('a') + u - 1)
+            print(f"Après traitement du nœud {label}:")
+            print_heights_and_excess(h, e)
+
+    if display:
+        flot_max = sum(graph[1][v][t] for v in range(n))  # Somme des flots entrants dans T
+        display_flow(graph)
+        print(f"Flot maximal: {flot_max}")
+    return graph[1]
+
+# Fonction d'affichage des hauteurs et éxécdents
+
+def print_height(h):
+    print("Hauteurs :")
+    for i in range(len(h)):
+        if i == 0:
+            label = "S"
+        elif i == len(h) - 1:
+            label = "T"
+        else:
+            label = chr(ord('a') + i - 1)
+        print(f"    {label} : hauteur de {label}")
+    print()
+
+def print_excess(e):
+    print("Exédents :")
+    for i in range(len(e)):
+        if i == 0:
+            label = "S"
+        elif i == len(e) - 1:
+            label = "T"
+        else:
+            label = chr(ord('a') + i - 1)
+        print(f"    {label} : exédent de {e[i]}")
+    print()
+
+def print_heights_and_excess(h, e):
+    print(f"{'Noeud:':<15}{'Exédent:':<20}{'Hauteur:':<12}")
+    for i in range(len(h)):
+        if i == 0:
+            label = "S"
+        elif i == len(h) - 1:
+            label = "T"
+        else:
+            label = chr(ord('a') + i - 1)
+        print(f"{label:<15}{e[i]:<20}{h[i]:<15}")
