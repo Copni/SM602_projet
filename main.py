@@ -31,6 +31,7 @@ def menu():
 
         # Lire le graphe depuis le fichier sélectionné
         graph = read_graph(selected_file)
+        display_graph(graph)
         if not graph:
             print("\nErreur lors de la lecture du fichier.")
             continue
