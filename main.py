@@ -1,4 +1,3 @@
-from operator import truth
 
 from display import display_graph, display_flow
 from graph import *
@@ -61,7 +60,7 @@ def menu():
         else:  # Problème de minimisation
             try:
                 n = int(input("Entrez la valeur du flot à utiliser : "))
-                print("\nRésolution avec l'algorithme de minimisation des coûts...")
+                print("\nRésolution avec l'algorithme de minimisation des coûts:")
                 minimize_C(graph, n, display=True)
             except ValueError:
                 print("\nEntrée invalide.")
