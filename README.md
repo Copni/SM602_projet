@@ -1,6 +1,7 @@
-# Résolution de Problèmes de Flots
+# SM602 : Résolution de Problèmes de Flots
 
 ## Description
+Projet du module de recherche opérationnelle SM602 vu à l'Efrei.
 Ce projet implémente plusieurs algorithmes pour résoudre des problèmes de flots dans les réseaux, notamment :
 - Algorithme d'Edmonds-Karp pour la maximisation de flot
 - Algorithme de Push-Relabel pour la maximisation de flot 
