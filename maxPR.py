@@ -106,6 +106,7 @@ def maximize_PR(graph, display=False):
         flot_max = sum(graph[1][v][t] for v in range(n))  # Somme des flots entrants dans T
         display_flow(graph)
         print(f"Flot maximal: {flot_max}")
+
     return graph[1]
 
 # Fonction d'affichage des hauteurs et éxécdents

@@ -146,7 +146,7 @@ def minimize_C(graph, n, display=False):
         for j in range(len(C)):
             total_cost += F[i][j] * cost[i][j]
 
-    print(f"Flot total envoyé : {total_sent}/{n}")
-    print(f"Coût total du flot : {total_cost}")
-
+    if display:
+        print(f"Flot total envoyé : {total_sent}/{n}")
+        print(f"Coût total du flot : {total_cost}")
 

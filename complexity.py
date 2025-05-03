@@ -48,7 +48,8 @@ def test(n, size, algorithm):
         elif algorithm == "PR":
             maximize_PR(graph, display=False)
         elif algorithm == "min":
-            minimize_C(graph, n=1, display=False)
+            n = sum(graph[0][i][-1] for i in range(len(graph[0]) - 1)) // 2
+            minimize_C(graph, n, display=False)
         else:
             raise ValueError("Algorithme non reconnu : choisissez 'EK', 'PR' ou 'min'.")
 
@@ -71,8 +72,12 @@ def save_results(times, algorithm, size):
 
     print(f"Résultats sauvegardés dans le fichier {filename}")
 
+def generate_data(algorithm, n, size):
+    times = test(n, size, algorithm)
+    # Sauvegarde les résultats
+    save_results(times, algorithm, size)
 
-test(100, 1000, "EK")
+generate_data("min", 100, 400)
 
 
 
