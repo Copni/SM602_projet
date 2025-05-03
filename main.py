@@ -1,5 +1,4 @@
-
-from display import display_graph, display_flow
+from display import *
 from graph import *
 from maxEK import *
 from maxPR import *

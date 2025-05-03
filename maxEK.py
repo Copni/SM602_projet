@@ -80,7 +80,8 @@ def adjust_flow_EK(graph, display=False):
     # On récupère la chaine améliorante
     chain = get_improving_chain_EK(graph, display)
     if chain == []:
-        print("Pas de chaine améliorante")
+        if display:
+            print("Pas de chaine améliorante")
         return None
     else:
         # On cherche le minimum de la chaine
@@ -118,8 +119,9 @@ def maximize_EK(graph, display=False):
         max = adjust_flow_EK(graph, display)
         i += 1
         if display:
-            print("Matrice résiduelle après l'itération :", i)
-            display_matrix(get_residual_EK(graph))
-    print("Matrice des flots après "+ str(i)+" itération:")
-    display_flow(graph)
-    print("Flot maximum:", sum(graph[1][0]))
+            print("Matrice des flots après " + str(i) + " itération:")
+            display_flow(graph)
+            print("Flot maximum:", sum(graph[1][0]))
+
+
+
