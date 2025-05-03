@@ -46,7 +46,7 @@ def read_graph(file):
     return data
 
 
-# Fonction qui affiche une matrice
+# Fonction qui affiche une matrice simplement
 def print_matrix(matrix):
     for row in matrix:
         for i in row:
@@ -54,13 +54,3 @@ def print_matrix(matrix):
         print()
 
 
-# Fonction affichant les matrices de capacité, de flux et de coût associées à un graph
-def print_graph(graph):
-    # Affiche le graph
-    print("Matrice des capacités :")
-    print_matrix(graph[0])
-    print("Matrice des flots :")
-    print_matrix(graph[1])
-    if graph[2] != []:
-        print("Matrice des coûts :")
-        print_matrix(graph[2])
