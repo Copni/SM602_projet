@@ -106,8 +106,10 @@ def adjust_flow_EK(graph, display=False):
 
             chain_labels = " -> ".join(node_to_label(node) for node in chain)
             print("Chaîne améliorante trouvée :", chain_labels)
+            """
             print("Flot envoyé sur la chaîne :", min)
             print("Matrice résiduelle mise à jour :")
+            """
             display_matrix(R)
 
 
