@@ -17,6 +17,7 @@ Ce projet implémente plusieurs algorithmes pour résoudre des problèmes de flo
 - `minC.py` : Implémentation de l'algorithme de minimisation des coûts
 - `graph.py` : Fonctions de manipulation des graphes
 - `display.py` : Fonctions d'affichage des matrices et résultats
+- `complexity.py` : Fonctions permettant de tester la complexité des matrices
 
 ## Format des fichiers d'entrée
 Les graphes doivent être fournis dans des fichiers `.txt` avec le format suivant :
