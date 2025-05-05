@@ -112,6 +112,8 @@ def adjust_flow_C(graph, n, display=False):
     if display:
         print("Matrice résiduelle mise à jour :")
         display_matrix(R)
+        print("Matrice des flots :")
+        display_flow(graph)
         labels = lambda i: "S" if i == 0 else "T" if i == len(F) - 1 else chr(ord('a') + i - 1)
         print("Flot envoyé sur la chaîne :", flow_to_send)
         print("Chaîne utilisée :", " -> ".join(labels(i) for i in chain))
