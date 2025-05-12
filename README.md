@@ -24,4 +24,4 @@ Les graphes doivent être fournis dans des fichiers `.txt` avec le format suivan
 ```txt
 n                    # Nombre de sommets
 matrice_capacites    # Matrice n×n des capacités
-[matrice_couts]      # Matrice n×n des coûts (optionnelle)
+matrice_couts        # Matrice n×n des coûts (optionnelle)
